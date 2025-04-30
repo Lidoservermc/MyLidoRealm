@@ -58,15 +58,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const login = async (username: string, email: string): Promise<void> => {
+  const login = async (username: string, password: string, email?: string): Promise<void> => {
     try {
-      // Check if user exists, register if not
+      // Try to login with username and password
       const loginResponse = await fetch('/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ username, password }),
         credentials: 'include',
       });
       
@@ -74,23 +74,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         // User exists, update the user state
         const userData = await loginResponse.json();
         setUser(userData.user);
-      } else if (loginResponse.status === 404) {
-        // User doesn't exist, register
-        const registerResponse = await apiRequest('POST', '/api/users/register', { 
-          username, 
-          email 
+        
+        toast({
+          title: "Welcome back to MyLido!",
+          description: `You're now logged in as ${username}`,
         });
-        setUser(registerResponse.user);
+      } else if (loginResponse.status === 401 && email) {
+        // If login fails and email is provided, try to register
+        const registerResponse = await fetch('/api/users/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password, email }),
+          credentials: 'include',
+        });
+        
+        if (registerResponse.ok) {
+          const registerData = await registerResponse.json();
+          setUser(registerData.user);
+          
+          toast({
+            title: "Welcome to MyLido!",
+            description: `Your account has been created. You're now logged in as ${username}`,
+          });
+        } else {
+          const errorData = await registerResponse.json();
+          throw new Error(errorData.message || 'Registration failed');
+        }
       } else {
         const errorData = await loginResponse.json();
         throw new Error(errorData.message || 'Login failed');
       }
-      
-      toast({
-        title: "Welcome to MyLido!",
-        description: `You're now logged in as ${username}`,
-      });
     } catch (error: any) {
+      console.error("Login failed:", error);
       toast({
         variant: "destructive",
         title: "Login Failed",
