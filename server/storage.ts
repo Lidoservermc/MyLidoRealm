@@ -135,51 +135,7 @@ export class DatabaseStorage implements IStorage {
 
   // Initialize with sample data if needed
   private async initializeSampleData() {
-    // Check if we have events already
-    const existingEvents = await this.getEvents();
-    if (existingEvents.length === 0) {
-      // Sample events
-      await this.createEvent({
-        title: "Grand Building Contest",
-        description: "Join us for an amazing building competition! Winners will receive diamond gear and special permissions.",
-        date: "Jan 22",
-        time: "8:00 PM",
-        location: "Spawn Area"
-      });
-      
-      await this.createEvent({
-        title: "PvP Tournament",
-        description: "Battle other players in our custom arena! The last player standing wins a special weapon with enchantments.",
-        date: "Jan 24",
-        time: "9:30 PM",
-        location: "Battle Arena"
-      });
-      
-      await this.createEvent({
-        title: "Dragon Hunt",
-        description: "Join forces to defeat the Ender Dragon! Everyone who participates will receive a share of the rewards.",
-        date: "Jan 28",
-        time: "7:00 PM",
-        location: "The End"
-      });
-    }
-
-    // Check if we have announcements already
-    const existingAnnouncements = await this.getAnnouncements();
-    if (existingAnnouncements.length === 0) {
-      // Sample announcements
-      await this.createAnnouncement({
-        title: "Server Upgrade Complete!",
-        content: "We've upgraded our server hardware! You should experience better performance and less lag during peak hours.",
-        date: "Jan 20"
-      });
-      
-      await this.createAnnouncement({
-        title: "New Survival Area Unlocked",
-        content: "We've opened a new survival area with rare biomes! Check it out at /warp new_lands",
-        date: "Jan 18"
-      });
-    }
+    // No sample data will be created - keeping this method for future expansion
   }
 }
 

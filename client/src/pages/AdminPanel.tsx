@@ -33,46 +33,11 @@ interface Announcement {
   date: string;
 }
 
-// Mock initial events
-const initialEvents: Event[] = [
-  { 
-    id: 1, 
-    title: "Grand Building Contest", 
-    description: "Show off your building skills in our monthly contest. This month's theme: Fantasy Castles!", 
-    date: "2025-01-22T20:00:00Z",
-    location: "Spawn Area"
-  },
-  { 
-    id: 2, 
-    title: "PvP Tournament", 
-    description: "Join our exciting PvP tournament. Great prizes for the top 3 winners!", 
-    date: "2025-01-24T21:30:00Z",
-    location: "Arena"
-  },
-  { 
-    id: 3, 
-    title: "Treasure Hunt", 
-    description: "Find hidden treasures across the map. First player to find all checkpoints wins a special prize.", 
-    date: "2025-01-28T19:00:00Z",
-    location: "Survival World"
-  }
-];
+// Empty initial events
+const initialEvents: Event[] = [];
 
-// Mock initial announcements
-const initialAnnouncements: Announcement[] = [
-  {
-    id: 1,
-    title: "Server Upgrade Complete!",
-    content: "We've upgraded our server hardware! You should experience better performance and less lag during peak hours.",
-    date: "2025-01-20T15:00:00Z"
-  },
-  {
-    id: 2,
-    title: "New Survival Area Unlocked",
-    content: "We've opened a new survival area with rare biomes! Check it out at /warp new_lands",
-    date: "2025-01-18T12:30:00Z"
-  }
-];
+// Empty initial announcements
+const initialAnnouncements: Announcement[] = [];
 
 const AdminPanel: React.FC = () => {
   const [, navigate] = useLocation();
