@@ -75,11 +75,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <i className="fas fa-user-shield mr-2"></i> Mod Apply
               </a>
             </Link>
-            <Link href="/rules">
-              <a className={`nav-tab font-minecraft px-4 py-3 text-white border-r-2 border-black ${currentTab === 'rules' ? 'bg-[#7DAF2A]' : 'hover:bg-[#593D29]/80'}`}>
-                <i className="fas fa-scroll mr-2"></i> Rules
-              </a>
-            </Link>
           </nav>
         </div>
       </div>
@@ -93,22 +88,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       {/* Footer */}
       <footer className="bg-[#1D1C1A] border-t-2 border-[#593D29] text-[#E9E0D4] py-4">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-4 md:mb-0 text-center md:text-left">
-            <p className="font-minecraft">Lido's Minecraft Realm</p>
-            <p className="text-xs mt-1 text-[#E9E0D4]/70">© 2023 MyLido. Not affiliated with Mojang Studios.</p>
-          </div>
-          <div className="flex space-x-4">
-            <a href="#" className="text-[#7DAF2A] hover:text-[#7DAF2A]/80 transition">
-              <i className="fab fa-discord text-xl"></i>
-            </a>
-            <a href="#" className="text-[#7DAF2A] hover:text-[#7DAF2A]/80 transition">
-              <i className="fab fa-twitter text-xl"></i>
-            </a>
-            <a href="#" className="text-[#7DAF2A] hover:text-[#7DAF2A]/80 transition">
-              <i className="fas fa-globe text-xl"></i>
-            </a>
-          </div>
+        <div className="container mx-auto px-4 text-center">
+          <p className="font-minecraft">Lido's Minecraft Realm</p>
+          <p className="text-xs mt-1 text-[#E9E0D4]/70">© 2023 MyLido. Not affiliated with Mojang Studios.</p>
         </div>
       </footer>
     </div>
