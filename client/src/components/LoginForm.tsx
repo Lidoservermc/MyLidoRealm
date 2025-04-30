@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { isValidMinecraftUsername } from "@/lib/utils";
+import { useLocation } from "wouter";
 
 interface LoginFormProps {
   onContinue: (username: string) => void;
@@ -10,6 +10,7 @@ interface LoginFormProps {
 const LoginForm: React.FC<LoginFormProps> = ({ onContinue }) => {
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
+  const [, setLocation] = useLocation();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,13 +20,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onContinue }) => {
       return;
     }
     
-    if (!isValidMinecraftUsername(username)) {
+    if (username.length < 3 || username.length > 16) {
       setError("Minecraft usernames must be 3-16 characters");
       return;
     }
     
+    // This is a fake login that doesn't connect to any API
+    // Just redirect to events page to simulate logging in
     setError("");
-    onContinue(username);
+    setLocation("/events");
   };
 
   return (
