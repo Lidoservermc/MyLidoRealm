@@ -9,6 +9,7 @@ import Events from "@/pages/Events";
 import Reports from "@/pages/Reports";
 import ModApply from "@/pages/ModApply";
 import Rules from "@/pages/Rules";
+import AdminPanel from "@/pages/AdminPanel";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/reports" component={Reports} />
       <Route path="/mod-apply" component={ModApply} />
       <Route path="/rules" component={Rules} />
+      <Route path="/admin" component={AdminPanel} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

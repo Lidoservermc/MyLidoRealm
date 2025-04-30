@@ -20,6 +20,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onContinue }) => {
       return;
     }
     
+    // Special case - if user types "Admin panel", take them to the admin page
+    if (username.trim().toLowerCase() === "admin panel") {
+      setLocation("/admin");
+      return;
+    }
+    
     if (username.length < 3 || username.length > 16) {
       setError("Minecraft usernames must be 3-16 characters");
       return;
