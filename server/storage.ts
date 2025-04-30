@@ -6,9 +6,17 @@ import {
   type Report, type InsertReport,
   type ModApplication, type InsertModApplication
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
 // Interface for storage operations
 export interface IStorage {
+  // Session store for express-session
+  sessionStore: session.Store;
+  
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -34,167 +42,145 @@ export interface IStorage {
   createModApplication(application: InsertModApplication): Promise<ModApplication>;
 }
 
-// In-memory storage implementation
-export class MemStorage implements IStorage {
-  private usersData: Map<number, User>;
-  private eventsData: Map<number, Event>;
-  private announcementsData: Map<number, Announcement>;
-  private reportsData: Map<number, Report>;
-  private modApplicationsData: Map<number, ModApplication>;
+// Database storage implementation
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
   
-  private userIdCounter: number;
-  private eventIdCounter: number;
-  private announcementIdCounter: number;
-  private reportIdCounter: number;
-  private modApplicationIdCounter: number;
-
   constructor() {
-    this.usersData = new Map();
-    this.eventsData = new Map();
-    this.announcementsData = new Map();
-    this.reportsData = new Map();
-    this.modApplicationsData = new Map();
+    const PostgresSessionStore = connectPg(session);
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
+    });
     
-    this.userIdCounter = 1;
-    this.eventIdCounter = 1;
-    this.announcementIdCounter = 1;
-    this.reportIdCounter = 1;
-    this.modApplicationIdCounter = 1;
-    
-    // Initialize with sample data
+    // Initialize with sample data if needed
     this.initializeSampleData();
   }
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.usersData.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.usersData.values()).find(
-      (user) => user.username.toLowerCase() === username.toLowerCase(),
-    );
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
-    const user: User = { ...insertUser, id };
-    this.usersData.set(id, user);
-    return user;
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
   }
 
   // Events operations
   async getEvents(): Promise<Event[]> {
-    return Array.from(this.eventsData.values());
+    return await db.select().from(events);
   }
 
   async getEvent(id: number): Promise<Event | undefined> {
-    return this.eventsData.get(id);
+    const result = await db.select().from(events).where(eq(events.id, id));
+    return result[0];
   }
 
   async createEvent(insertEvent: InsertEvent): Promise<Event> {
-    const id = this.eventIdCounter++;
-    const event: Event = { ...insertEvent, id };
-    this.eventsData.set(id, event);
-    return event;
+    const result = await db.insert(events).values(insertEvent).returning();
+    return result[0];
   }
 
   // Announcements operations
   async getAnnouncements(): Promise<Announcement[]> {
-    return Array.from(this.announcementsData.values());
+    return await db.select().from(announcements);
   }
 
   async createAnnouncement(insertAnnouncement: InsertAnnouncement): Promise<Announcement> {
-    const id = this.announcementIdCounter++;
-    const announcement: Announcement = { ...insertAnnouncement, id };
-    this.announcementsData.set(id, announcement);
-    return announcement;
+    const result = await db.insert(announcements).values(insertAnnouncement).returning();
+    return result[0];
   }
 
   // Reports operations
   async getReports(): Promise<Report[]> {
-    return Array.from(this.reportsData.values());
+    return await db.select().from(reports);
   }
 
   async getReportsByUserId(userId: number): Promise<Report[]> {
-    return Array.from(this.reportsData.values()).filter(
-      (report) => report.userId === userId
-    );
+    return await db.select().from(reports).where(eq(reports.userId, userId));
   }
 
   async createReport(insertReport: InsertReport): Promise<Report> {
-    const id = this.reportIdCounter++;
-    const report: Report = { 
-      ...insertReport, 
-      id,
+    const result = await db.insert(reports).values({
+      ...insertReport,
       status: "Under Review"
-    };
-    this.reportsData.set(id, report);
-    return report;
+    }).returning();
+    return result[0];
   }
 
   // Mod applications operations
   async getModApplications(): Promise<ModApplication[]> {
-    return Array.from(this.modApplicationsData.values());
+    return await db.select().from(modApplications);
   }
 
   async getModApplicationByUserId(userId: number): Promise<ModApplication | undefined> {
-    return Array.from(this.modApplicationsData.values()).find(
-      (application) => application.userId === userId
-    );
+    const result = await db.select().from(modApplications).where(eq(modApplications.userId, userId));
+    return result[0];
   }
 
   async createModApplication(insertApplication: InsertModApplication): Promise<ModApplication> {
-    const id = this.modApplicationIdCounter++;
-    const application: ModApplication = { 
-      ...insertApplication, 
-      id,
+    const result = await db.insert(modApplications).values({
+      ...insertApplication,
       status: "Pending"
-    };
-    this.modApplicationsData.set(id, application);
-    return application;
+    }).returning();
+    return result[0];
   }
 
-  // Initialize with sample data
-  private initializeSampleData() {
-    // Sample events
-    this.createEvent({
-      title: "Grand Building Contest",
-      description: "Join us for an amazing building competition! Winners will receive diamond gear and special permissions.",
-      date: "Jan 22",
-      time: "8:00 PM",
-      location: "Spawn Area"
-    });
-    
-    this.createEvent({
-      title: "PvP Tournament",
-      description: "Battle other players in our custom arena! The last player standing wins a special weapon with enchantments.",
-      date: "Jan 24",
-      time: "9:30 PM",
-      location: "Battle Arena"
-    });
-    
-    this.createEvent({
-      title: "Dragon Hunt",
-      description: "Join forces to defeat the Ender Dragon! Everyone who participates will receive a share of the rewards.",
-      date: "Jan 28",
-      time: "7:00 PM",
-      location: "The End"
-    });
+  // Initialize with sample data if needed
+  private async initializeSampleData() {
+    // Check if we have events already
+    const existingEvents = await this.getEvents();
+    if (existingEvents.length === 0) {
+      // Sample events
+      await this.createEvent({
+        title: "Grand Building Contest",
+        description: "Join us for an amazing building competition! Winners will receive diamond gear and special permissions.",
+        date: "Jan 22",
+        time: "8:00 PM",
+        location: "Spawn Area"
+      });
+      
+      await this.createEvent({
+        title: "PvP Tournament",
+        description: "Battle other players in our custom arena! The last player standing wins a special weapon with enchantments.",
+        date: "Jan 24",
+        time: "9:30 PM",
+        location: "Battle Arena"
+      });
+      
+      await this.createEvent({
+        title: "Dragon Hunt",
+        description: "Join forces to defeat the Ender Dragon! Everyone who participates will receive a share of the rewards.",
+        date: "Jan 28",
+        time: "7:00 PM",
+        location: "The End"
+      });
+    }
 
-    // Sample announcements
-    this.createAnnouncement({
-      title: "Server Upgrade Complete!",
-      content: "We've upgraded our server hardware! You should experience better performance and less lag during peak hours.",
-      date: "Jan 20"
-    });
-    
-    this.createAnnouncement({
-      title: "New Survival Area Unlocked",
-      content: "We've opened a new survival area with rare biomes! Check it out at /warp new_lands",
-      date: "Jan 18"
-    });
+    // Check if we have announcements already
+    const existingAnnouncements = await this.getAnnouncements();
+    if (existingAnnouncements.length === 0) {
+      // Sample announcements
+      await this.createAnnouncement({
+        title: "Server Upgrade Complete!",
+        content: "We've upgraded our server hardware! You should experience better performance and less lag during peak hours.",
+        date: "Jan 20"
+      });
+      
+      await this.createAnnouncement({
+        title: "New Survival Area Unlocked",
+        content: "We've opened a new survival area with rare biomes! Check it out at /warp new_lands",
+        date: "Jan 18"
+      });
+    }
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
